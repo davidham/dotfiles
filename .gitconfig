@@ -180,3 +180,8 @@
 [url "git://gist.github.com/"]
 
 	insteadOf = "gist:"
+
+[user]
+
+	name = David Ham
+	email = dham@clearcover.com
