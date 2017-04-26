@@ -164,5 +164,6 @@ alias path='echo -e ${PATH//:/\\n}'
 
 # Docker aliases
 alias dx='docker exec -it'
+alias dc='docker-compose'
 alias dcx='docker-compose exec'
 alias dcr='docker-compose run'
