@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Make vim the default editor.
-export EDITOR='atom';
+export EDITOR='code --wait';
 
 # Enable persistent REPL history for `node`.
 export NODE_REPL_HISTORY=~/.node_history;
@@ -28,3 +28,10 @@ export LESS_TERMCAP_md="${yellow}";
 
 # Don’t clear the screen after quitting a manual page.
 export MANPAGER='less -X';
+
+export ANSIBLE_INVENTORY=~/ansible_hosts
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" # This loads nvm
+
+export JAVA_HOME=`/usr/libexec/java_home -v 1.8.0_242`
