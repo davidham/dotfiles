@@ -95,7 +95,7 @@ unset jscbin;
 alias c="tr -d '\n' | pbcopy"
 
 # Recursively delete `.DS_Store` files
-alias cleanup="find . -type f -name '*.DS_Store' -ls -delete"
+# alias cleanup="find . -type f -name '*.DS_Store' -ls -delete"
 
 # Empty the Trash on all mounted volumes and the main HDD.
 # Also, clear Apple’s System Logs to improve shell startup speed.
@@ -167,3 +167,26 @@ alias dx='docker exec -it'
 alias dc='docker-compose'
 alias dcx='docker-compose exec'
 alias dcr='docker-compose run'
+
+# Kubernetes aliases
+alias k='kubectl'
+alias kc='kubectl config'
+alias kctxt='kubectl config use-context'
+
+# Terraform aliases
+alias tf='terraform'
+alias ti='terraform init'
+alias tg='terraform get'
+alias tp='terraform plan'
+alias ta='terraform apply -auto-approve'
+
+# AWS
+alias aws_whoami='aws sts get-caller-identity'
+alias login_aws='docker run -it --rm -v ~/.aws/credentials:/root/.aws/credentials -v ~/.okta_aws_login_config:/root/.okta_aws_login_config gimme-aws-creds'
+alias arsa='export AWS_PROFILE="clearcover-staging-admin"; echo "Now using AWS profile: ${AWS_PROFILE}"'
+alias arpa='export AWS_PROFILE="clearcover-production-admin"; echo "Now using AWS profile: ${AWS_PROFILE}"'
+alias aria='export AWS_PROFILE="clearcover-iam-admin"; echo "Now using AWS profile: ${AWS_PROFILE}"'
+
+
+alias kiali='kubectl port-forward -n istio-system $(kubectl get pod -n istio-system -l app=kiali -o jsonpath="{.items[0].metadata.name}") 20001'
+alias grafana='kubectl port-forward -n istio-system $(kubectl get pod -n istio-system -l app=grafana -o jsonpath="{.items[0].metadata.name}") 3000'
