@@ -59,12 +59,12 @@ function fs() {
 }
 
 # Use Git’s colored diff when available
-hash git &>/dev/null;
-if [ $? -eq 0 ]; then
-	function diff() {
-		git diff --no-index --color-words "$@";
-	}
-fi;
+# hash git &>/dev/null;
+# if [ $? -eq 0 ]; then
+# 	function diff() {
+# 		git diff --no-index --color-words "$@";
+# 	}
+# fi;
 
 # Create a data URL from a file
 function dataurl() {
@@ -234,3 +234,41 @@ function o() {
 function tre() {
 	tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
 }
+
+function initConfigVar () {
+    if [[ $(ls ~/.kube/configs | grep kubeconfig | wc -l) != 0 ]]; then
+        for f in `ls ~/.kube/configs/ | grep kubeconfig`;
+        do export KUBECONFIG="$HOME/.kube/configs/$f:$KUBECONFIG"; done && \
+        export KUBECONFIG=$(echo $KUBECONFIG | sed 's/:$//')
+    fi
+}
+if [[ -d $HOME/.kube/configs ]] && initConfigVar; then
+  kubectl config get-contexts
+else
+  mkdir $HOME/.kube/configs && \
+  echo "No configs directory. Put kubeconfigs in $HOME/.kube/configs/ and source this profile to load."
+fi
+
+# deletes local branches that are not ahead of master / are deleted remotely
+function clean_branches() {
+  REMOTES="$@";
+  if [ -z "$REMOTES" ]; then
+    REMOTES=$(git remote);
+  fi
+  REMOTES=$(echo "$REMOTES" | xargs -n1 echo)
+  RBRANCHES=()
+  while read REMOTE; do
+    CURRBRANCHES=($(git ls-remote $REMOTE | awk '{print $2}' | grep 'refs/heads/' | sed 's:refs/heads/::'))
+    RBRANCHES=("${CURRBRANCHES[@]}" "${RBRANCHES[@]}")
+  done < <(echo "$REMOTES" )
+  [[ $RBRANCHES ]] || exit
+  LBRANCHES=($(git branch | sed 's:\*::' | awk '{print $1}'))
+  for i in "${LBRANCHES[@]}"; do
+    skip=
+    for j in "${RBRANCHES[@]}"; do
+      [[ $i == $j ]] && { skip=1; echo -e "\033[32m Keeping $i \033[0m"; break; }
+    done
+    [[ -n $skip ]] || { echo -e "\033[31m $(git branch -D $i) \033[0m"; }
+  done
+}
+
