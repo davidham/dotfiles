@@ -21,10 +21,8 @@ export NVM_DIR="$HOME/.nvm"
 # restart
 ssh-add -K ~/.ssh/id_rsa
 
-# so we don't have to run assume-role in eval
-source $(which assume-role)
 
-source ~/.profile
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
 
 
 [[ -f $HOME/.kube/configs ]] && \
