@@ -1,0 +1,24 @@
+- defaults:
+    link:
+      relink: true
+
+- clean: ['~']
+
+- link:
+    ~/.prompt: .prompt
+    ~/.exports: .exports
+    ~/.aliases: .aliases
+    ~/.functions: .functions
+    ~/.extra: .extra
+    ~/.secrets: .secrets
+    ~/editorconfig: .editorconfig
+
+# - create:
+#     - ~/downloads
+#     - ~/.vim/undo-history
+
+- shell:
+  - [git submodule update --init --recursive, Installing submodules]
+
+# Update dotbot with
+# git submodule update --remote dotbot
