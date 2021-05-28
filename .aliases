@@ -187,6 +187,7 @@ alias arsa='export AWS_PROFILE="clearcover-staging-admin"; echo "Now using AWS p
 alias arpa='export AWS_PROFILE="clearcover-production-admin"; echo "Now using AWS profile: ${AWS_PROFILE}"'
 alias aria='export AWS_PROFILE="clearcover-iam-admin"; echo "Now using AWS profile: ${AWS_PROFILE}"'
 
+alias arse='export AWS_PROFILE="clearcover-staging-engineering"; echo "Now using AWS profile: ${AWS_PROFILE}"'
+alias arpe='export AWS_PROFILE="clearcover-production-engineering"; echo "Now using AWS profile: ${AWS_PROFILE}"'
 
-alias kiali='kubectl port-forward -n istio-system $(kubectl get pod -n istio-system -l app=kiali -o jsonpath="{.items[0].metadata.name}") 20001'
-alias grafana='kubectl port-forward -n istio-system $(kubectl get pod -n istio-system -l app=grafana -o jsonpath="{.items[0].metadata.name}") 3000'
+alias python='/usr/local/bin/python3'
