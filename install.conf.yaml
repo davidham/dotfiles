@@ -12,7 +12,9 @@
     ~/.extra: .extra
     ~/.secrets: .secrets
     ~/.path: .path
+    ~/.zshrc: .zshrc
     ~/editorconfig: .editorconfig
+    ~/.gitconfig: .gitconfig
 
 # - create:
 #     - ~/downloads
