@@ -182,6 +182,11 @@
 	insteadOf = "gist:"
 
 [user]
-
 	name = David Ham
-	email = dham@clearcover.com
+	email = me@davidham.com
+
+[commit]
+	gpgsign = false
+
+[pull]
+	rebase = false

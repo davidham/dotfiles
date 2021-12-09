@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Make vim the default editor.
+# Make VSCode the default editor.
 export EDITOR='code --wait';
 
 # Enable persistent REPL history for `node`.
@@ -35,3 +35,6 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" # This loads nvm
 
 export JAVA_HOME=`/usr/libexec/java_home -v 1.8.0_242`
+
+export PKG_CONFIG_PATH="/usr/local/opt/libpq/lib/pkgconfig"
+

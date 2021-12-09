@@ -13,6 +13,7 @@
     ~/.secrets: .secrets
     ~/.path: .path
     ~/.editorconfig: .editorconfig
+    ~/.gitconfig: .gitconfig
     ~/.zshrc:
       path: .zshrc
       force: true
