@@ -4,7 +4,7 @@
 # Git credentials
 # Not in the repository, to prevent people from accidentally committing under my name
 GIT_AUTHOR_NAME="David Ham"
-GIT_AUTHOR_EMAIL="dham@clearcover.com"
+GIT_AUTHOR_EMAIL="me@davidham.com"
 
 GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
 GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"

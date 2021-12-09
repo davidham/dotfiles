@@ -12,7 +12,10 @@
     ~/.extra: .extra
     ~/.secrets: .secrets
     ~/.path: .path
-    ~/editorconfig: .editorconfig
+    ~/.editorconfig: .editorconfig
+    ~/.zshrc:
+      path: .zshrc
+      force: true
 
 # - create:
 #     - ~/downloads
