@@ -183,7 +183,7 @@
 
 [user]
 	name = David Ham
-	email = me@davidham.com
+	email = david.ham@postscript.io
 
 [commit]
 	gpgsign = false
