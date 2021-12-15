@@ -190,4 +190,4 @@ alias aria='export AWS_PROFILE="clearcover-iam-admin"; echo "Now using AWS profi
 alias arse='export AWS_PROFILE="clearcover-staging-engineering"; echo "Now using AWS profile: ${AWS_PROFILE}"'
 alias arpe='export AWS_PROFILE="clearcover-production-engineering"; echo "Now using AWS profile: ${AWS_PROFILE}"'
 
-alias python='/usr/local/bin/python3'
+alias python='/opt/homebrew/bin/python3'
