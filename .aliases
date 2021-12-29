@@ -177,8 +177,8 @@ alias kctxt='kubectl config use-context'
 alias tf='terraform'
 alias ti='terraform init'
 alias tg='terraform get'
-alias tp='terraform plan'
-alias ta='terraform apply -auto-approve'
+alias tp='terraform plan -out tfplan'
+alias ta='terraform apply tfplan'
 
 # AWS
 alias aws_whoami='aws sts get-caller-identity'
