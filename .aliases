@@ -178,7 +178,7 @@ alias tf='terraform'
 alias ti='terraform init'
 alias tg='terraform get'
 alias tp='terraform plan -out tfplan'
-alias ta='terraform apply tfplan'
+alias ta='terraform apply tfplan && rm tfplan'
 
 # AWS
 alias aws_whoami='aws sts get-caller-identity'
