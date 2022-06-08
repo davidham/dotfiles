@@ -184,7 +184,10 @@ alias ta='terraform apply tfplan && rm tfplan'
 alias aws_whoami='aws sts get-caller-identity'
 # alias login_aws='docker run -it --rm -v ~/.aws/credentials:/root/.aws/credentials -v ~/.okta_aws_login_config:/root/.okta_aws_login_config gimme-aws-creds'
 alias login_aws='aws sso login'
+alias laws='aws --endpoint-url=http://localhost:4566'
 
-alias python='/opt/homebrew/bin/python3'
+alias python='$(which python3)'
+alias pip='/opt/homebrew/bin/pip3'
 
 alias reload_dotfiles='~/dotfiles/install && source ~/.zshrc'
+
