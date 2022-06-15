@@ -19,7 +19,7 @@ export NVM_DIR="$HOME/.nvm"
 
 # This is so we don't have to enter the ssh key password every time we
 # restart
-ssh-add -K ~/.ssh/id_rsa
+ssh-add --apple-use-keychain ~/.ssh/id_rsa
 
 
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
