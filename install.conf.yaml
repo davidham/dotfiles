@@ -17,6 +17,9 @@
     ~/.zshrc:
       path: .zshrc
       force: true
+    ~/.zprofile:
+      path: .zprofile
+      force: true
 
 # - create:
 #     - ~/downloads

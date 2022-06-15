@@ -183,10 +183,15 @@
 
 [user]
 	name = David Ham
-	email = me@davidham.com
+	email = davidham@users.noreply.github.com
 
 [commit]
 	gpgsign = false
 
 [pull]
 	rebase = false
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true

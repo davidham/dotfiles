@@ -272,3 +272,25 @@ function clean_branches() {
   done
 }
 
+function profile() {
+  export AWS_PROFILE=$1
+}
+
+function download_secret() {
+  local SECRET_NAME=$1
+  local OUTPUT_FILE="${2:-secrets.json}"
+
+  aws secretsmanager get-secret-value \
+    --secret-id ${SECRET_NAME} \
+    | jq -S '.SecretString | fromjson' \
+    > $(pwd)/${OUTPUT_FILE}
+}
+
+function upload_secret() {
+  local SECRET_NAME=$1
+  local INPUT_FILE="${2:-secrets.json}"
+
+  aws secretsmanager put-secret-value \
+    --secret-id ${SECRET_NAME} \
+    --secret-string file://$(pwd)/${INPUT_FILE}
+}

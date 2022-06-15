@@ -57,6 +57,10 @@ function prompt_git() {
 	fi;
 }
 
+function aws_profile() {
+  echo ${AWS_PROFILE}
+}
+
 if tput setaf 1 &> /dev/null; then
 	tput sgr0; # reset colors
 	bold=$(tput bold);
@@ -106,6 +110,7 @@ fi;
 PS1="${bold}";
 PS1+=$'\n';
 PS1+="${userStyle}%n"; # username
+PS1+='${blue} (aws: $(aws_profile))';
 PS1+="${white} at ";
 PS1+="${hostStyle}%m"; # host
 PS1+="${white} in ";
