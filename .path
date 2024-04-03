@@ -6,15 +6,10 @@ export PATH=/usr/local/bin/ansible/bin:/usr/local/bin/ansible/test/runner:$PATH
 export PATH=/usr/local/opt/libxml2/bin:$PATH
 export PATH=/usr/local/opt/libxslt/bin:$PATH
 export PATH=/usr/local/bin/easyrsa:$PATH
-
-export PATH=$HOME/.rvm/bin:$PATH # Add RVM to PATH for scripting
+export PATH=$HOME/.nix-profile/bin:$PATH
 
 export GOPATH=~/go
 export PATH=$GOPATH/bin:$PATH
 
 export PATH=$HOME/Library/Python/3.9/bin:$PATH
 export PATH=$HOME/.local/bin:$PATH
-
-# export PYTHONPATH=/usr/local/bin/ansible/lib
-# export MANPATH=/usr/local/bin/ansible/docs/man:$MANPATH
-

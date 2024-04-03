@@ -11,6 +11,9 @@ setopt NO_CASE_GLOB
 # Just enter the path you want, without `cd`
 setopt AUTO_CD
 
+# append completions to fpath
+fpath=(${ASDF_DIR}/completions $fpath)
+
 autoload -Uz compinit && compinit
 
 # Save history when closing the window
@@ -28,7 +31,13 @@ setopt INC_APPEND_HISTORY
 setopt CORRECT
 setopt CORRECT_ALL
 
-eval "$(pyenv init -)"
 
-# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-export PATH="$PATH:$HOME/.rvm/bin"
+# https://asdf-vm.com/guide/getting-started.html#_3-install-asdf
+. $HOME/.asdf/asdf.sh
+
+
+export DIRENV_LOG_FORMAT="$(printf "\033[2mdirenv: %%s\033[0m")"
+eval "$(direnv hook zsh)"
+_direnv_hook() {
+  eval "$(direnv export zsh 2> >(egrep -v -e '^....direnv: export' >&2))"
+};

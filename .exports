@@ -29,8 +29,6 @@ export LESS_TERMCAP_md="${yellow}";
 # Don’t clear the screen after quitting a manual page.
 export MANPAGER='less -X';
 
-export ANSIBLE_INVENTORY=~/ansible_hosts
-
 export PKG_CONFIG_PATH="/usr/local/opt/libpq/lib/pkgconfig"
 
 # From https://knasmueller.net/how-to-install-java-openjdk-17-on-macos-big-sur
@@ -44,4 +42,3 @@ export NVM_DIR="$HOME/.nvm"
 # https://github.com/hashicorp/terraform-provider-aws/issues/20274
 export GODEBUG=asyncpreemptoff=1
 
-export GEM_HOME=$HOME/.gem
