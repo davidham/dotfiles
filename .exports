@@ -31,14 +31,22 @@ export MANPAGER='less -X';
 
 export PKG_CONFIG_PATH="/usr/local/opt/libpq/lib/pkgconfig"
 
-# From https://knasmueller.net/how-to-install-java-openjdk-17-on-macos-big-sur
-export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.0.1.jdk/Contents/Home
+# # From https://knasmueller.net/how-to-install-java-openjdk-17-on-macos-big-sur
+# Commenting out because it makes Bazel unhappy
+# export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.0.1.jdk/Contents/Home
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-# To deal with intermittent Terraform errors
-# https://github.com/hashicorp/terraform-provider-aws/issues/20274
-export GODEBUG=asyncpreemptoff=1
+export GOPATH=$HOME/go/bin
 
+export DOCKER_DEFAULT_PLATFORM=linux/amd64
+
+export AWS_PROFILE=govcloud-dev
+
+export ASDF_DATA_DIR=$HOME/.asdf
+# Doing PATH here and not in the `path` file because path is loaded before exports
+export PATH="$ASDF_DATA_DIR/shims:$PATH"
+
+export ANSIBLE_PYTHON_INTERPRETER=$HOME/.asdf/shims/python
