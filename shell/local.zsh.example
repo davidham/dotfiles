@@ -1,0 +1,17 @@
+# Machine-local shell config. Copy this file to
+# ${XDG_CONFIG_HOME:-$HOME/.config}/shell-local.zsh and edit there.
+# The real file is gitignored. Never commit secrets to the dotfiles repo.
+
+# --- SSH key auto-load (uncomment if you want it) ---
+# Loads your default SSH key into the macOS keychain at shell start so
+# you do not have to enter the passphrase after every reboot.
+# if [[ -o interactive ]] && [[ -f ~/.ssh/id_ed25519 ]]; then
+#   ssh-add --apple-use-keychain ~/.ssh/id_ed25519 2>/dev/null
+# fi
+
+# --- Per-machine env vars ---
+# export SOMETHING=value
+
+# --- Per-machine secrets ---
+# Prefer 1Password CLI, AWS Secrets Manager, etc. over plaintext here.
+# export GITHUB_TOKEN=...
