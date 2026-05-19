@@ -32,12 +32,30 @@ setopt CORRECT
 setopt CORRECT_ALL
 
 
-# https://asdf-vm.com/guide/getting-started.html#_3-install-asdf
-. $HOME/.asdf/asdf.sh
+# # https://asdf-vm.com/guide/getting-started.html#_3-install-asdf
+# . $HOME/.asdf/asdf.sh
 
-
+# DIRENV LOG_FORMAT comes before the hook setup
 export DIRENV_LOG_FORMAT="$(printf "\033[2mdirenv: %%s\033[0m")"
+export DIRENV_LOG_FORMAT=""
+
+[[ -e ~/.zprofile ]] && emulate sh -c 'source ~/.zprofile'
+
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/davidham/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/davidham/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/davidham/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/davidham/google-cloud-sdk/completion.zsh.inc'; fi
+
+source <(apollo-cli completion zsh)
+
 eval "$(direnv hook zsh)"
 _direnv_hook() {
   eval "$(direnv export zsh 2> >(egrep -v -e '^....direnv: export' >&2))"
 };
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/davidham/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions
