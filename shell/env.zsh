@@ -15,8 +15,12 @@ done
 unset d
 
 # --- PATH ---
-# Order: most-specific first. /opt/homebrew/bin comes from `brew shellenv`
-# in ~/.zprofile and is not duplicated here.
+# Order: most-specific first. asdf shims (prepended below) end up at the
+# front. /opt/homebrew/bin is added by `brew shellenv` in ~/.zprofile,
+# which zshrc.zsh sources AFTER this file, so it does not appear here.
+# In zsh, the `path` array and `$PATH` are tied -- assigning to one
+# updates the other.
+# shellcheck disable=SC2206
 path=(
   "$HOME/bin"
   "$HOME/.local/bin"
@@ -25,7 +29,6 @@ path=(
   "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
   $path
 )
-export PATH
 
 # --- Editor ---
 export EDITOR='code --wait'
@@ -61,16 +64,26 @@ export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
 # (GOPATH=$HOME/go/bin combined with PATH entry ~/go/bin/bin) was a
 # pair of bugs that partly cancelled.
 export GOPATH="$HOME/go"
+# shellcheck disable=SC2206
 path=("$GOPATH/bin" $path)
-export PATH
 
 # --- Docker ---
 export DOCKER_DEFAULT_PLATFORM=linux/amd64
 
 # --- AWS ---
-export AWS_PROFILE=govcloud-dev
+# Default profile; can be overridden in shell-local.zsh or by the env.
+export AWS_PROFILE="${AWS_PROFILE:-govcloud-dev}"
 
 # --- asdf ---
+# ASDF_DATA_DIR is where shims and installs live. ASDF_DIR is where the
+# asdf installation itself lives (completions, asdf.sh). For the default
+# Homebrew/asdf install they are the same directory.
 export ASDF_DATA_DIR="$HOME/.asdf"
+export ASDF_DIR="${ASDF_DIR:-$ASDF_DATA_DIR}"
+# shellcheck disable=SC2206
 path=("$ASDF_DATA_DIR/shims" $path)
+
+# Re-export PATH once at the end. zsh ties `path` and `PATH` automatically,
+# but a single explicit export documents the intent and covers any subshell
+# weirdness.
 export PATH

@@ -1,9 +1,10 @@
 #!/usr/bin/env zsh
 # Entrypoint. Symlinked to ~/.zshrc by Dotbot.
 
-# Resolve the repo's shell/ dir relative to this script (zsh ${0:A:h}
-# returns the absolute, symlink-resolved directory of the script).
-_DOTFILES_SHELL_DIR="${0:A:h}/../shell"
+# Resolve the repo's shell/ dir. ${(%):-%N} is the path of the file
+# being sourced (works in .zshrc where $0 is just "zsh"); :A resolves
+# symlinks; :h takes the parent directory.
+_DOTFILES_SHELL_DIR="${${(%):-%N}:A:h:h}/shell"
 
 # Source order matters: env.zsh first (PATH, EDITOR, XDG vars), then
 # everything else.
@@ -23,7 +24,9 @@ setopt NO_CASE_GLOB
 setopt AUTO_CD
 
 # Augment fpath BEFORE compinit so all completion files are picked up.
-fpath=(${ASDF_DIR}/completions $fpath)
+if [ -d "$ASDF_DIR/completions" ]; then
+  fpath=("$ASDF_DIR/completions" $fpath)
+fi
 if [ -d "$HOME/.docker/completions" ]; then
   fpath=("$HOME/.docker/completions" $fpath)
 fi
