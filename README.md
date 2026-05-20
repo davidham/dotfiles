@@ -1,110 +1,80 @@
-# Mathias’s dotfiles
+# dotfiles
 
-![Screenshot of my shell prompt](https://i.imgur.com/EkEtphC.png)
+Personal dotfiles managed by [Dotbot](https://github.com/anishathalye/dotbot).
+zsh-first; macOS-only assumptions; XDG conventions where supported.
 
-## Installation
+## Layout
 
-**Warning:** If you want to give these dotfiles a try, you should first fork this repository, review the code, and remove things you don’t want or need. Don’t blindly use my settings unless you know what that entails. Use at your own risk!
-
-### Using Git and the bootstrap script
-
-You can clone the repository wherever you want. (I like to keep it in `~/Projects/dotfiles`, with `~/dotfiles` as a symlink.) The bootstrapper script will pull in the latest version and copy the files to your home folder.
-
-```bash
-git clone https://github.com/mathiasbynens/dotfiles.git && cd dotfiles && source bootstrap.sh
+```
+home/   files symlinked into $HOME (.zshrc, .zprofile, .editorconfig, .yarnrc.yml)
+xdg/    files symlinked under ~/.config/ (git, npm, ghostty, zellij, nvim, direnv)
+shell/  zsh modules sourced by home/zshrc.zsh (env, aliases, functions, prompt, fzf, local example)
+scripts/  helper scripts (lint)
 ```
 
-To update, `cd` into your local `dotfiles` repository and then:
+The directory name documents the symlink target. `home/X` -> `~/.X`.
+`xdg/<tool>/file` -> `~/.config/<tool>/file`. `shell/*.zsh` is sourced,
+not symlinked.
+
+## Bootstrap on a fresh machine
 
 ```bash
-source bootstrap.sh
+git clone git@github.com:davidham/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+./install                 # creates symlinks; pulls dotbot submodule
+pre-commit install        # enables the git hook for secret scanning
 ```
 
-Alternatively, to update while avoiding the confirmation prompt:
+Required tools (install with Homebrew):
 
 ```bash
-set -- -f; source bootstrap.sh
+brew install gitleaks shellcheck shfmt pre-commit fzf
 ```
 
-### Git-free install
+Optional tools the shell adapts to (no errors if absent):
 
-To install these dotfiles without Git:
+- `fd` or `ripgrep` -- nicer file source for fzf's Ctrl-T. `brew install fd ripgrep`
+- `tree` -- used by the `tre` shell function. `brew install tree`
+- `jq` -- used by the `download_secret` / `upload_secret` AWS helpers. `brew install jq`
+- `awscli`, `aws-vault`, `kubectl`, `terraform`, `docker`, `bazel` -- aliases reference these but only when invoked.
+- `direnv` -- if installed, hooked at shell startup. If absent, no error.
+- `apollo-cli` -- Grafana-internal; if installed, completions load.
+- Google Cloud SDK at `~/google-cloud-sdk` -- if installed, paths and completions load.
+
+asdf, gcloud, Docker, etc. are managed outside this repo.
+
+## Adding a shell module
+
+Drop a file in `shell/` ending in `.zsh`. Source it from `home/zshrc.zsh`
+in the `for module in env aliases ... ; do` loop -- order matters
+(env first).
+
+## Per-machine overrides
+
+Anything machine-local (e.g., a work-specific export, SSH key auto-load
+with a non-default path) goes in
+`${XDG_CONFIG_HOME:-$HOME/.config}/shell-local.zsh`. This file is
+gitignored. `shell/local.zsh.example` is the template; copy it once and
+edit in place.
+
+## Linting
 
 ```bash
-cd; curl -#L https://github.com/mathiasbynens/dotfiles/tarball/master | tar -xzv --strip-components 1 --exclude={README.md,bootstrap.sh,.osx,LICENSE-MIT.txt}
+./scripts/lint            # runs pre-commit on every file
 ```
 
-To update later on, just run that command again.
+CI mirrors this. See `.github/workflows/ci.yml`.
 
-### Specify the `$PATH`
+## Secrets
 
-If `~/.path` exists, it will be sourced along with the other files, before any feature testing (such as [detecting which version of `ls` is being used](https://github.com/mathiasbynens/dotfiles/blob/aff769fd75225d8f2e481185a71d5e05b76002dc/.aliases#L21-26)) takes place.
+Never commit secrets. Patterns:
 
-Here’s an example `~/.path` file that adds `/usr/local/bin` to the `$PATH`:
+- Files containing real secrets are gitignored and live outside the repo.
+- Template files end in `.example` or `.tmpl` and contain placeholders.
+- gitleaks runs at commit time and in CI; it blocks accidental secret
+  pushes. The repo allowlists `*.example` and `*.tmpl` paths.
+- GitHub push protection is enabled as a final backstop.
 
-```bash
-export PATH="/usr/local/bin:$PATH"
-```
-
-### Add custom commands without creating a new fork
-
-If `~/.extra` exists, it will be sourced along with the other files. You can use this to add a few custom commands without the need to fork this entire repository, or to add commands you don’t want to commit to a public repository.
-
-My `~/.extra` looks something like this:
-
-```bash
-# Git credentials
-# Not in the repository, to prevent people from accidentally committing under my name
-GIT_AUTHOR_NAME="Mathias Bynens"
-GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
-git config --global user.name "$GIT_AUTHOR_NAME"
-GIT_AUTHOR_EMAIL="mathias@mailinator.com"
-GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
-git config --global user.email "$GIT_AUTHOR_EMAIL"
-```
-
-You could also use `~/.extra` to override settings, functions and aliases from my dotfiles repository. It’s probably better to [fork this repository](https://github.com/mathiasbynens/dotfiles/fork) instead, though.
-
-### Sensible macOS defaults
-
-When setting up a new Mac, you may want to set some sensible macOS defaults:
-
-```bash
-./.macos
-```
-
-### Install Homebrew formulae
-
-When setting up a new Mac, you may want to install some common [Homebrew](http://brew.sh/) formulae (after installing Homebrew, of course):
-
-```bash
-./brew.sh
-```
-
-## Feedback
-
-Suggestions/improvements
-[welcome](https://github.com/mathiasbynens/dotfiles/issues)!
-
-## Author
-
-| [![twitter/mathias](http://gravatar.com/avatar/24e08a9ea84deb17ae121074d0f17125?s=70)](http://twitter.com/mathias "Follow @mathias on Twitter") |
-|---|
-| [Mathias Bynens](https://mathiasbynens.be/) |
-
-## Thanks to…
-
-* @ptb and [his _OS X Lion Setup_ repository](https://github.com/ptb/Mac-OS-X-Lion-Setup)
-* [Ben Alman](http://benalman.com/) and his [dotfiles repository](https://github.com/cowboy/dotfiles)
-* [Chris Gerke](http://www.randomsquared.com/) and his [tutorial on creating an OS X SOE master image](http://chris-gerke.blogspot.com/2012/04/mac-osx-soe-master-image-day-7.html) + [_Insta_ repository](https://github.com/cgerke/Insta)
-* [Cătălin Mariș](https://github.com/alrra) and his [dotfiles repository](https://github.com/alrra/dotfiles)
-* [Gianni Chiappetta](http://gf3.ca/) for sharing his [amazing collection of dotfiles](https://github.com/gf3/dotfiles)
-* [Jan Moesen](http://jan.moesen.nu/) and his [ancient `.bash_profile`](https://gist.github.com/1156154) + [shiny _tilde_ repository](https://github.com/janmoesen/tilde)
-* [Lauri ‘Lri’ Ranta](http://lri.me/) for sharing [loads of hidden preferences](http://osxnotes.net/defaults.html)
-* [Matijs Brinkhuis](http://hotfusion.nl/) and his [dotfiles repository](https://github.com/matijs/dotfiles)
-* [Nicolas Gallagher](http://nicolasgallagher.com/) and his [dotfiles repository](https://github.com/necolas/dotfiles)
-* [Sindre Sorhus](http://sindresorhus.com/)
-* [Tom Ryder](https://sanctum.geek.nz/) and his [dotfiles repository](https://sanctum.geek.nz/cgit/dotfiles.git/about)
-* [Kevin Suttle](http://kevinsuttle.com/) and his [dotfiles repository](https://github.com/kevinSuttle/dotfiles) and [OSXDefaults project](https://github.com/kevinSuttle/OSXDefaults), which aims to provide better documentation for [`~/.macos`](https://mths.be/macos)
-* [Haralan Dobrev](http://hkdobrev.com/)
-* anyone who [contributed a patch](https://github.com/mathiasbynens/dotfiles/contributors) or [made a helpful suggestion](https://github.com/mathiasbynens/dotfiles/issues)
+If you discover a leaked credential in history: rotate the credential
+first, decide whether to rewrite history second. Rotation is fast;
+rewriting public history is loud and breaks forks.

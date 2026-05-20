@@ -1,0 +1,19 @@
+# shellcheck has partial zsh support; the directives below let it lint
+# the bash-compatible parts of our zsh files without false-positiving on
+# zsh-only idioms.
+shell=bash
+
+# SC1090, SC1091: "source" non-followable / file not found. Common in dotfiles
+#   where we conditionally source files that may not exist at lint time.
+# SC2128: expanding an array without an index. Zsh ties `path`/`fpath` to
+#   `$PATH`/`$FPATH` and `$path` is the idiomatic way to splice in the
+#   existing entries.
+# SC2206: word splitting on array assignment. Same zsh-array idiom.
+# SC2168: 'local' is only valid in functions. zsh allows it at top level
+#   of a sourced file; we use it for scope hygiene on transient vars.
+# SC2139: alias expansion at definition time. Intentional for color-flag
+#   detection (`alias l="ls ${colorflag}"`) -- we want the value baked in.
+# SC2296, SC2298: parameter expansion can't start with ( / ${${x}} is invalid.
+#   Zsh-only syntax (e.g., ${(j.:.)array} for array join, ${${x}:A:h} for
+#   path manipulation).
+disable=SC1090,SC1091,SC2128,SC2206,SC2168,SC2139,SC2296,SC2298

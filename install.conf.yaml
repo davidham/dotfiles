@@ -1,29 +1,31 @@
 - defaults:
     link:
       relink: true
+      create: true
 
-- clean: ['~']
+- clean: ['~', '~/.config']
 
 - link:
-    ~/.prompt: .prompt
-    ~/.exports: .exports
-    ~/.aliases: .aliases
-    ~/.functions: .functions
-    ~/.extra: .extra
-    ~/.secrets: .secrets
-    ~/.path: .path
-    ~/.editorconfig: .editorconfig
-    ~/.gitconfig: .gitconfig
     ~/.zshrc:
-      path: .zshrc
+      path: home/zshrc.zsh
       force: true
     ~/.zprofile:
-      path: .zprofile
+      path: home/zprofile.zsh
       force: true
+    ~/.editorconfig: home/editorconfig
+    ~/.yarnrc.yml: home/yarnrc.yml
 
-# - create:
-#     - ~/downloads
-#     - ~/.vim/undo-history
+    ~/.config/git/config: xdg/git/config
+    ~/.config/git/attributes: xdg/git/attributes
+    ~/.config/git/ignore: xdg/git/ignore
+
+    ~/.config/npm/npmrc: xdg/npm/npmrc
+
+    ~/.config/nvim: xdg/nvim
+    ~/.config/ghostty/config: xdg/ghostty/config
+    ~/.config/zellij/config.kdl: xdg/zellij/config.kdl
+    ~/.config/direnv/direnv.toml: xdg/direnv/direnv.toml
+    ~/.config/direnv/direnvrc: xdg/direnv/direnvrc
 
 - shell:
   - [git submodule update --init --recursive, Installing submodules]

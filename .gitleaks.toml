@@ -1,0 +1,13 @@
+# Use the upstream default ruleset, with a small allowlist for
+# template/example files that legitimately contain placeholder values.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Template and example files"
+paths = [
+    '''\.example$''',
+    '''\.tmpl$''',
+    '''shell/local\.zsh\.example$''',
+]
