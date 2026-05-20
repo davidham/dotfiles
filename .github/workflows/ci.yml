@@ -9,13 +9,13 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
-          fetch-depth: 0   # full history so gitleaks scans everything
+          fetch-depth: 0 # full history so gitleaks scans everything
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install shellcheck and shfmt
         run: |
@@ -31,7 +31,7 @@ jobs:
   gitleaks-history:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
