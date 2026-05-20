@@ -28,6 +28,7 @@
     ~/.config/direnv/direnv.toml: xdg/direnv/direnv.toml
     ~/.config/direnv/direnvrc: xdg/direnv/direnvrc
     ~/.config/nix/nix.conf: xdg/nix/nix.conf
+    ~/.config/gh/config.yml: xdg/gh/config.yml
 
 - shell:
   - [git submodule update --init --recursive, Installing submodules]
