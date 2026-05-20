@@ -1,279 +1,132 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
+# Shell functions. Sourced by home/zshrc.zsh.
+# shellcheck shell=bash
 
-# Create a new directory and enter it
-function mkd() {
-	mkdir -p "$@" && cd "$_";
+# Create a directory and cd into it.
+mkd() {
+  mkdir -p "$@" && cd "$_" || return
 }
 
-# Change working directory to the top-most Finder window location
-function cdf() { # short for `cdfinder`
-	cd "$(osascript -e 'tell app "Finder" to POSIX path of (insertion location as alias)')";
+# cd to the directory of the front Finder window.
+cdf() {
+  cd "$(osascript -e 'tell app "Finder" to POSIX path of (insertion location as alias)')" || return
 }
 
-# Create a .tar.gz archive, using `zopfli`, `pigz` or `gzip` for compression
-function targz() {
-	local tmpFile="${@%/}.tar";
-	tar -cvf "${tmpFile}" --exclude=".DS_Store" "${@}" || return 1;
-
-	size=$(
-		stat -f"%z" "${tmpFile}" 2> /dev/null; # macOS `stat`
-		stat -c"%s" "${tmpFile}" 2> /dev/null;  # GNU `stat`
-	);
-
-	local cmd="";
-	if (( size < 52428800 )) && hash zopfli 2> /dev/null; then
-		# the .tar file is smaller than 50 MB and Zopfli is available; use it
-		cmd="zopfli";
-	else
-		if hash pigz 2> /dev/null; then
-			cmd="pigz";
-		else
-			cmd="gzip";
-		fi;
-	fi;
-
-	echo "Compressing .tar ($((size / 1000)) kB) using \`${cmd}\`…";
-	"${cmd}" -v "${tmpFile}" || return 1;
-	[ -f "${tmpFile}" ] && rm "${tmpFile}";
-
-	zippedSize=$(
-		stat -f"%z" "${tmpFile}.gz" 2> /dev/null; # macOS `stat`
-		stat -c"%s" "${tmpFile}.gz" 2> /dev/null; # GNU `stat`
-	);
-
-	echo "${tmpFile}.gz ($((zippedSize / 1000)) kB) created successfully.";
-}
-
-# Determine size of a file or total size of a directory
-function fs() {
-	if du -b /dev/null > /dev/null 2>&1; then
-		local arg=-sbh;
-	else
-		local arg=-sh;
-	fi
-	if [[ -n "$@" ]]; then
-		du $arg -- "$@";
-	else
-		du $arg .[^.]* ./*;
-	fi;
-}
-
-# Use Git’s colored diff when available
-# hash git &>/dev/null;
-# if [ $? -eq 0 ]; then
-# 	function diff() {
-# 		git diff --no-index --color-words "$@";
-# 	}
-# fi;
-
-# Create a data URL from a file
-function dataurl() {
-	local mimeType=$(file -b --mime-type "$1");
-	if [[ $mimeType == text/* ]]; then
-		mimeType="${mimeType};charset=utf-8";
-	fi
-	echo "data:${mimeType};base64,$(openssl base64 -in "$1" | tr -d '\n')";
-}
-
-# Create a git.io short URL
-function gitio() {
-	if [ -z "${1}" -o -z "${2}" ]; then
-		echo "Usage: \`gitio slug url\`";
-		return 1;
-	fi;
-	curl -i https://git.io/ -F "url=${2}" -F "code=${1}";
-}
-
-# Start an HTTP server from a directory, optionally specifying the port
-function server() {
-	local port="${1:-8000}";
-	sleep 1 && open "http://localhost:${port}/" &
-	# Set the default Content-Type to `text/plain` instead of `application/octet-stream`
-	# And serve everything as UTF-8 (although not technically correct, this doesn’t break anything for binary files)
-	python -c $'import SimpleHTTPServer;\nmap = SimpleHTTPServer.SimpleHTTPRequestHandler.extensions_map;\nmap[""] = "text/plain";\nfor key, value in map.items():\n\tmap[key] = value + ";charset=UTF-8";\nSimpleHTTPServer.test();' "$port";
-}
-
-# Start a PHP server from a directory, optionally specifying the port
-# (Requires PHP 5.4.0+.)
-function phpserver() {
-	local port="${1:-4000}";
-	local ip=$(ipconfig getifaddr en1);
-	sleep 1 && open "http://${ip}:${port}/" &
-	php -S "${ip}:${port}";
-}
-
-# Compare original and gzipped file size
-function gz() {
-	local origsize=$(wc -c < "$1");
-	local gzipsize=$(gzip -c "$1" | wc -c);
-	local ratio=$(echo "$gzipsize * 100 / $origsize" | bc -l);
-	printf "orig: %d bytes\n" "$origsize";
-	printf "gzip: %d bytes (%2.2f%%)\n" "$gzipsize" "$ratio";
-}
-
-# Syntax-highlight JSON strings or files
-# Usage: `json '{"foo":42}'` or `echo '{"foo":42}' | json`
-function json() {
-	if [ -t 0 ]; then # argument
-		python -mjson.tool <<< "$*" | pygmentize -l javascript;
-	else # pipe
-		python -mjson.tool | pygmentize -l javascript;
-	fi;
-}
-
-# Run `dig` and display the most useful info
-function digga() {
-	dig +nocmd "$1" any +multiline +noall +answer;
-}
-
-# UTF-8-encode a string of Unicode symbols
-function escape() {
-	printf "\\\x%s" $(printf "$@" | xxd -p -c1 -u);
-	# print a newline unless we’re piping the output to another program
-	if [ -t 1 ]; then
-		echo ""; # newline
-	fi;
-}
-
-# Decode \x{ABCD}-style Unicode escape sequences
-function unidecode() {
-	perl -e "binmode(STDOUT, ':utf8'); print \"$@\"";
-	# print a newline unless we’re piping the output to another program
-	if [ -t 1 ]; then
-		echo ""; # newline
-	fi;
-}
-
-# Get a character’s Unicode code point
-function codepoint() {
-	perl -e "use utf8; print sprintf('U+%04X', ord(\"$@\"))";
-	# print a newline unless we’re piping the output to another program
-	if [ -t 1 ]; then
-		echo ""; # newline
-	fi;
-}
-
-# Show all the names (CNs and SANs) listed in the SSL certificate
-# for a given domain
-function getcertnames() {
-	if [ -z "${1}" ]; then
-		echo "ERROR: No domain specified.";
-		return 1;
-	fi;
-
-	local domain="${1}";
-	echo "Testing ${domain}…";
-	echo ""; # newline
-
-	local tmp=$(echo -e "GET / HTTP/1.0\nEOT" \
-		| openssl s_client -connect "${domain}:443" -servername "${domain}" 2>&1);
-
-	if [[ "${tmp}" = *"-----BEGIN CERTIFICATE-----"* ]]; then
-		local certText=$(echo "${tmp}" \
-			| openssl x509 -text -certopt "no_aux, no_header, no_issuer, no_pubkey, \
-			no_serial, no_sigdump, no_signame, no_validity, no_version");
-		echo "Common Name:";
-		echo ""; # newline
-		echo "${certText}" | grep "Subject:" | sed -e "s/^.*CN=//" | sed -e "s/\/emailAddress=.*//";
-		echo ""; # newline
-		echo "Subject Alternative Name(s):";
-		echo ""; # newline
-		echo "${certText}" | grep -A 1 "Subject Alternative Name:" \
-			| sed -e "2s/DNS://g" -e "s/ //g" | tr "," "\n" | tail -n +2;
-		return 0;
-	else
-		echo "ERROR: Certificate not found.";
-		return 1;
-	fi;
-}
-
-
-
-# `v` with no arguments opens the current directory in Vim, otherwise opens the
-# given location
-function v() {
-	if [ $# -eq 0 ]; then
-		vim .;
-	else
-		vim "$@";
-	fi;
-}
-
-# `o` with no arguments opens the current directory, otherwise opens the given
-# location
-function o() {
-	if [ $# -eq 0 ]; then
-		open .;
-	else
-		open "$@";
-	fi;
-}
-
-# `tre` is a shorthand for `tree` with hidden files and color enabled, ignoring
-# the `.git` directory, listing directories first. The output gets piped into
-# `less` with options to preserve color and line numbers, unless the output is
-# small enough for one screen.
-function tre() {
-	tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
-}
-
-function initConfigVar () {
-    if [[ $(ls ~/.kube/configs | grep kubeconfig | wc -l) != 0 ]]; then
-        for f in `ls ~/.kube/configs/ | grep kubeconfig`;
-        do export KUBECONFIG="$HOME/.kube/configs/$f:$KUBECONFIG"; done && \
-        export KUBECONFIG=$(echo $KUBECONFIG | sed 's/:$//')
-    fi
-}
-if [[ -d $HOME/.kube/configs ]] && initConfigVar; then
-  kubectl config get-contexts
-else
-  mkdir $HOME/.kube/configs && \
-  echo "No configs directory. Put kubeconfigs in $HOME/.kube/configs/ and source this profile to load."
-fi
-
-# deletes local branches that are not ahead of master / are deleted remotely
-function clean_branches() {
-  REMOTES="$@";
-  if [ -z "$REMOTES" ]; then
-    REMOTES=$(git remote);
+# Size of a file or total size of a directory.
+fs() {
+  local arg
+  if du -b /dev/null > /dev/null 2>&1; then
+    arg=-sbh
+  else
+    arg=-sh
   fi
-  REMOTES=$(echo "$REMOTES" | xargs -n1 echo)
-  RBRANCHES=()
-  while read REMOTE; do
-    CURRBRANCHES=($(git ls-remote $REMOTE | awk '{print $2}' | grep 'refs/heads/' | sed 's:refs/heads/::'))
-    RBRANCHES=("${CURRBRANCHES[@]}" "${RBRANCHES[@]}")
-  done < <(echo "$REMOTES" )
-  [[ $RBRANCHES ]] || exit
-  LBRANCHES=($(git branch | sed 's:\*::' | awk '{print $1}'))
-  for i in "${LBRANCHES[@]}"; do
-    skip=
-    for j in "${RBRANCHES[@]}"; do
-      [[ $i == $j ]] && { skip=1; echo -e "\033[32m Keeping $i \033[0m"; break; }
-    done
-    [[ -n $skip ]] || { echo -e "\033[31m $(git branch -D $i) \033[0m"; }
-  done
+  if [[ -n "$*" ]]; then
+    du $arg -- "$@"
+  else
+    du $arg .[^.]* ./*
+  fi
 }
 
-function profile() {
+# Open in $EDITOR (vim if $EDITOR unset).
+v() {
+  if [ $# -eq 0 ]; then
+    "${EDITOR:-vim}" .
+  else
+    "${EDITOR:-vim}" "$@"
+  fi
+}
+
+# Open in default app.
+o() {
+  if [ $# -eq 0 ]; then
+    open .
+  else
+    open "$@"
+  fi
+}
+
+# Tree with sensible defaults piped through less.
+tre() {
+  tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX
+}
+
+# Aggregate kubeconfigs from ~/.kube/configs/ into KUBECONFIG.
+# Previously ran kubectl config get-contexts at shell start (slow + noisy
+# + auto-mkdir). Now: just set KUBECONFIG if the directory exists, no
+# side effects.
+load_kubeconfigs() {
+  local configs_dir="$HOME/.kube/configs"
+  [[ -d $configs_dir ]] || return 0
+  local kubeconfigs=()
+  local f
+  for f in "$configs_dir"/*kubeconfig*(N); do
+    kubeconfigs+=("$f")
+  done
+  if (( ${#kubeconfigs} > 0 )); then
+    export KUBECONFIG="${(j.:.)kubeconfigs}${KUBECONFIG:+:$KUBECONFIG}"
+  fi
+}
+load_kubeconfigs
+
+# Set AWS_PROFILE.
+profile() {
   export AWS_PROFILE=$1
 }
 
-function download_secret() {
+# Pull a JSON secret out of AWS Secrets Manager.
+download_secret() {
   local SECRET_NAME=$1
   local OUTPUT_FILE="${2:-secrets.json}"
-
   aws secretsmanager get-secret-value \
-    --secret-id ${SECRET_NAME} \
+    --secret-id "${SECRET_NAME}" \
     | jq -S '.SecretString | fromjson' \
-    > $(pwd)/${OUTPUT_FILE}
+    > "$(pwd)/${OUTPUT_FILE}"
 }
 
-function upload_secret() {
+# Push a JSON secret to AWS Secrets Manager.
+upload_secret() {
   local SECRET_NAME=$1
   local INPUT_FILE="${2:-secrets.json}"
-
   aws secretsmanager put-secret-value \
-    --secret-id ${SECRET_NAME} \
-    --secret-string file://$(pwd)/${INPUT_FILE}
+    --secret-id "${SECRET_NAME}" \
+    --secret-string "file://$(pwd)/${INPUT_FILE}"
 }
 
+# Delete local branches not present at any remote.
+# The commit-commands:clean_gone Claude skill is the recommended workflow
+# alternative for "delete local branches whose upstream is gone." This
+# function is broader: it deletes any local branch that has no remote
+# counterpart, not just gone-upstream branches. Force-delete is used --
+# review your branch list before running.
+clean_branches() {
+  local REMOTES="$*"
+  if [ -z "$REMOTES" ]; then
+    REMOTES=$(git remote)
+  fi
+  REMOTES=$(echo "$REMOTES" | xargs -n1 echo)
+  local RBRANCHES=()
+  while read -r REMOTE; do
+    local CURRBRANCHES=()
+    while IFS= read -r b; do
+      CURRBRANCHES+=("$b")
+    done < <(git ls-remote "$REMOTE" | awk '{print $2}' | grep 'refs/heads/' | sed 's:refs/heads/::')
+    RBRANCHES=("${CURRBRANCHES[@]}" "${RBRANCHES[@]}")
+  done < <(echo "$REMOTES")
+  [[ ${#RBRANCHES[@]} -eq 0 ]] && return
+  local LBRANCHES=()
+  while IFS= read -r b; do
+    LBRANCHES+=("$b")
+  done < <(git branch | sed 's:\*::' | awk '{print $1}')
+  local i j skip
+  for i in "${LBRANCHES[@]}"; do
+    skip=
+    for j in "${RBRANCHES[@]}"; do
+      if [[ "$i" == "$j" ]]; then
+        skip=1
+        printf '\033[32m Keeping %s \033[0m\n' "$i"
+        break
+      fi
+    done
+    [[ -n $skip ]] || printf '\033[31m %s \033[0m\n' "$(git branch -D "$i")"
+  done
+}
