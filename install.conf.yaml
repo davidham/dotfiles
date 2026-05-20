@@ -16,6 +16,7 @@
 
     ~/.config/git/config: xdg/git/config
     ~/.config/git/attributes: xdg/git/attributes
+    ~/.config/git/ignore: xdg/git/ignore
 
 - shell:
   - [git submodule update --init --recursive, Installing submodules]
