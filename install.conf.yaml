@@ -18,6 +18,8 @@
     ~/.config/git/attributes: xdg/git/attributes
     ~/.config/git/ignore: xdg/git/ignore
 
+    ~/.config/npm/npmrc: xdg/npm/npmrc
+
 - shell:
   - [git submodule update --init --recursive, Installing submodules]
 
