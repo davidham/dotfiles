@@ -67,4 +67,3 @@ if command -v direnv >/dev/null 2>&1; then
     eval "$(direnv export zsh 2> >(grep -E -v -e '^....direnv: export' >&2))"
   }
 fi
-

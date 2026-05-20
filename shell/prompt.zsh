@@ -1,4 +1,6 @@
 #!/usr/bin/env zsh
+# shellcheck disable=all
+# zsh-heavy: TRAPUSR1, ZLE, porcelain v2 parsing -- shellcheck cannot lint usefully.
 
 setopt PROMPT_SUBST
 if [[ $COLORTERM = gnome-* && $TERM = xterm ]] && infocmp gnome-256color >/dev/null 2>&1; then

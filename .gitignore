@@ -16,3 +16,6 @@ Thumbs.db
 
 # Local Claude Code project state and overrides
 .claude/
+
+# nvim transient log
+.nvimlog

@@ -5,7 +5,6 @@
 # shellcheck shell=bash
 
 if command -v fzf >/dev/null 2>&1; then
-  local fzf_prefix
   fzf_prefix="$(brew --prefix 2>/dev/null)/opt/fzf/shell"
   if [[ -d $fzf_prefix ]]; then
     [[ -r "$fzf_prefix/key-bindings.zsh" ]] && source "$fzf_prefix/key-bindings.zsh"
