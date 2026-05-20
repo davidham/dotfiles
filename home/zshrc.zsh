@@ -19,13 +19,6 @@ local_override="${XDG_CONFIG_HOME:-$HOME/.config}/shell-local.zsh"
 [[ -r $local_override ]] && source "$local_override"
 unset local_override
 
-# Provisional env.zsh and fzf.zsh do not exist yet at this commit; the
-# loop is a no-op for those modules until later commits create them.
-# .exports and .path are still at repo root; source them transitionally
-# so the shell remains functional between this commit and Task 7.
-[[ -r "${0:A:h}/../.exports" ]] && source "${0:A:h}/../.exports"
-[[ -r "${0:A:h}/../.path" ]] && source "${0:A:h}/../.path"
-
 setopt NO_CASE_GLOB
 setopt AUTO_CD
 
@@ -37,8 +30,6 @@ fi
 
 autoload -Uz compinit && compinit
 
-# Save history when closing the window
-HISTFILE=${ZDOTDIR:-$HOME}/.zsh_history
 setopt EXTENDED_HISTORY
 setopt SHARE_HISTORY
 setopt APPEND_HISTORY
