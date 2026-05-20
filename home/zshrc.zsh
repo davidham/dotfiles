@@ -29,8 +29,11 @@ unset local_override
 setopt NO_CASE_GLOB
 setopt AUTO_CD
 
-# append completions to fpath
+# Augment fpath BEFORE compinit so all completion files are picked up.
 fpath=(${ASDF_DIR}/completions $fpath)
+if [ -d "$HOME/.docker/completions" ]; then
+  fpath=("$HOME/.docker/completions" $fpath)
+fi
 
 autoload -Uz compinit && compinit
 
@@ -43,8 +46,8 @@ setopt INC_APPEND_HISTORY
 setopt CORRECT
 setopt CORRECT_ALL
 
-# DIRENV LOG_FORMAT comes before the hook setup
-export DIRENV_LOG_FORMAT="$(printf "\033[2mdirenv: %%s\033[0m")"
+# Silence direnv output (empty format string suppresses all log lines).
+# Must be set before the direnv hook runs.
 export DIRENV_LOG_FORMAT=""
 
 [[ -e ~/.zprofile ]] && emulate sh -c 'source ~/.zprofile'
@@ -70,7 +73,3 @@ if command -v direnv >/dev/null 2>&1; then
   }
 fi
 
-# Docker CLI completions -- only if Docker drops its completions dir there.
-if [ -d "$HOME/.docker/completions" ]; then
-  fpath=("$HOME/.docker/completions" $fpath)
-fi
