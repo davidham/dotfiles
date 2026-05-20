@@ -1,0 +1,6 @@
+# source $HOME/.nix-profile/share/nix-direnv/direnvrc
+
+layout_git() {
+  export GIT_DIR=$(git rev-parse --git-dir)
+  export GIT_WORK_TREE=$(pwd)
+}
