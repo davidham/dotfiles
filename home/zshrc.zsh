@@ -31,7 +31,8 @@ if [ -d "$HOME/.docker/completions" ]; then
   fpath=("$HOME/.docker/completions" $fpath)
 fi
 
-autoload -Uz compinit && compinit
+autoload -Uz compinit
+compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
 
 setopt EXTENDED_HISTORY
 setopt SHARE_HISTORY
