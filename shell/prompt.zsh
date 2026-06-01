@@ -140,8 +140,18 @@ TRAPUSR1() {
 	dir=${content%%$'\t'*}
 	rendered=${content#*$'\t'}
 	if [[ $dir == $PWD ]]; then
-		_PROMPT_GIT_STATUS=$rendered
-		zle && zle reset-prompt
+		# Only redraw if the rendered status actually changed. zle
+		# reset-prompt has geometry quirks when the prompt wraps (long
+		# branch names in big repos), and the redraw can clobber the
+		# blank line above the prompt. Most consecutive commands in
+		# the same repo produce identical status -- skipping the
+		# redraw for those avoids the issue entirely. Only the first
+		# command after chpwd will trigger a redraw and possibly hit
+		# the glitch.
+		if [[ $_PROMPT_GIT_STATUS != $rendered ]]; then
+			_PROMPT_GIT_STATUS=$rendered
+			zle && zle reset-prompt
+		fi
 	else
 		# Result is for an old PWD; kick a fresh compute for the current dir.
 		_prompt_git_kick
@@ -155,6 +165,26 @@ _prompt_git_chpwd() {
 autoload -Uz add-zsh-hook
 add-zsh-hook precmd _prompt_git_kick
 add-zsh-hook chpwd _prompt_git_chpwd
+
+# Print a blank line before each prompt for visual separation between
+# commands. This was previously done with a leading $'\n' inside PS1,
+# but that put the recorded prompt-start position one line above the
+# actual prompt content. Combined with Ghostty's OSC 133;A;cl=line
+# fresh-line behavior, `zle reset-prompt` from TRAPUSR1 would clear
+# into the previous command's output. Printing the blank line here,
+# outside PS1, keeps the prompt-start position on the user-info line
+# so reset-prompt can never touch the command output above.
+_prompt_blank_line() { print; }
+add-zsh-hook precmd _prompt_blank_line
+
+# The default accept-line widget skips precmd when the buffer is
+# empty, which means _prompt_blank_line above never runs for a bare
+# Enter and there's no visual separation between successive prompts.
+# Wrapping accept-line (even with a no-op body) forces the full
+# command cycle including precmd, so _prompt_blank_line fires and we
+# get the same blank line we get after a real command.
+_prompt_accept_line() { zle .accept-line; }
+zle -N accept-line _prompt_accept_line
 
 # Backwards compat: anything else that calls prompt_git just gets the cached
 # value. The PS1 below references $_PROMPT_GIT_STATUS directly.
@@ -181,8 +211,10 @@ else
 fi;
 
 # Set the terminal title and prompt.
+# The blank line above the prompt is printed by the _prompt_blank_line
+# precmd hook above -- do NOT add a leading $'\n' to PS1 (see comment
+# there for why).
 PS1="${bold}";
-PS1+=$'\n';
 PS1+="${userStyle}%n"; # username
 PS1+='${blue} (aws: $(aws_profile))';
 PS1+="${white} at ";
