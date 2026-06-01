@@ -8,11 +8,18 @@ _DOTFILES_SHELL_DIR="${${(%):-%N}:A:h:h}/shell"
 
 # Source order matters: env.zsh first (PATH, EDITOR, XDG vars), then
 # everything else.
+#
+# Note: do NOT name the loop var `module_path` -- that's a reserved zsh
+# special parameter (the array tied to MODULE_PATH used to locate
+# loadable .so modules). Overwriting and then unsetting it breaks
+# zmodload for the rest of the session, which produces errors from
+# fzf's completion.zsh (zsh/regex), compinit (zsh/complete), and
+# Ghostty's shell integration (zsh/zleparameter).
 for module in env aliases functions prompt fzf; do
-  module_path="${_DOTFILES_SHELL_DIR}/${module}.zsh"
-  [[ -r $module_path ]] && source "$module_path"
+  module_file="${_DOTFILES_SHELL_DIR}/${module}.zsh"
+  [[ -r $module_file ]] && source "$module_file"
 done
-unset module module_path
+unset module module_file
 
 # Machine-local override (gitignored). Sourced last so it can override
 # anything above.
