@@ -13,5 +13,25 @@
 # export SOMETHING=value
 
 # --- Per-machine secrets ---
-# Prefer 1Password CLI, AWS Secrets Manager, etc. over plaintext here.
-# export GITHUB_TOKEN=...
+# Never put plaintext secrets here. Prefer a secret manager (1Password CLI,
+# AWS Secrets Manager, etc.) and load secrets lazily so they are fetched
+# only when needed -- not on every shell startup.
+#
+# Example: load GITHUB_TOKEN from 1Password the first time you run `gh`.
+# The token lives in 1Password (op://<vault>/<item>/<field>); it is cached
+# in $GITHUB_TOKEN for the rest of the session after one fetch. Requires the
+# 1Password CLI (`brew install 1password-cli`) with desktop-app integration.
+#
+# _OP_GITHUB_TOKEN_ACCOUNT="my.1password.com"   # omit --account if single-account
+# _OP_GITHUB_TOKEN_REF="op://Private/GitHub CLI token/credential"
+#
+# _load_github_token() {
+#   [[ -n $GITHUB_TOKEN ]] && return 0
+#   command -v op >/dev/null 2>&1 || { print -u2 "op (1Password CLI) not found"; return 1; }
+#   local _tok
+#   _tok="$(op read --account "$_OP_GITHUB_TOKEN_ACCOUNT" "$_OP_GITHUB_TOKEN_REF" 2>/dev/null)" \
+#     || { print -u2 "failed to read GITHUB_TOKEN from 1Password"; return 1; }
+#   export GITHUB_TOKEN="$_tok"
+# }
+#
+# gh() { _load_github_token || return 1; command gh "$@"; }
