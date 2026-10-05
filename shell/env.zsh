@@ -86,10 +86,17 @@ path=("$ASDF_DATA_DIR/shims" $path)
 # Sandboxed tools (e.g. Claude Code) need a fixed path to allowlist, so
 # keep a stable symlink that always points at the current live socket,
 # and point every tool at the symlink instead of the volatile path.
-if [[ -n "$SSH_AUTH_SOCK" && -S "$SSH_AUTH_SOCK" ]]; then
-  ln -sf "$SSH_AUTH_SOCK" "$HOME/.ssh/agent.sock"
-  export SSH_AUTH_SOCK="$HOME/.ssh/agent.sock"
+#
+# Guard against SSH_AUTH_SOCK already being the stable path itself (e.g.
+# inherited from a parent shell that already did this rewrite): relinking
+# it against itself would silently turn the symlink into a self-loop
+# (ln -sf succeeds but breaks it), so only relink when the source differs.
+_ssh_agent_stable_sock="$HOME/.ssh/agent.sock"
+if [[ -n "$SSH_AUTH_SOCK" && "$SSH_AUTH_SOCK" != "$_ssh_agent_stable_sock" && -S "$SSH_AUTH_SOCK" ]]; then
+  ln -sf "$SSH_AUTH_SOCK" "$_ssh_agent_stable_sock"
 fi
+[[ -S "$_ssh_agent_stable_sock" ]] && export SSH_AUTH_SOCK="$_ssh_agent_stable_sock"
+unset _ssh_agent_stable_sock
 
 # Re-export PATH once at the end. zsh ties `path` and `PATH` automatically,
 # but a single explicit export documents the intent and covers any subshell
