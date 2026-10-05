@@ -80,6 +80,17 @@ export ASDF_DIR="${ASDF_DIR:-$ASDF_DATA_DIR}"
 # shellcheck disable=SC2206
 path=("$ASDF_DATA_DIR/shims" $path)
 
+# --- SSH agent ---
+# macOS's Keychain-backed ssh-agent publishes SSH_AUTH_SOCK at a path that
+# changes every login session (/var/run/com.apple.launchd.<random>/...).
+# Sandboxed tools (e.g. Claude Code) need a fixed path to allowlist, so
+# keep a stable symlink that always points at the current live socket,
+# and point every tool at the symlink instead of the volatile path.
+if [[ -n "$SSH_AUTH_SOCK" && -S "$SSH_AUTH_SOCK" ]]; then
+  ln -sf "$SSH_AUTH_SOCK" "$HOME/.ssh/agent.sock"
+  export SSH_AUTH_SOCK="$HOME/.ssh/agent.sock"
+fi
+
 # Re-export PATH once at the end. zsh ties `path` and `PATH` automatically,
 # but a single explicit export documents the intent and covers any subshell
 # weirdness.
