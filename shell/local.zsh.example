@@ -13,75 +13,23 @@
 # export SOMETHING=value
 
 # --- Per-machine secrets ---
-# Never put plaintext secrets here. Prefer a secret manager (1Password CLI,
-# AWS Secrets Manager, etc.).
+# Never put plaintext secrets here. Prefer a secret manager.
 #
-# --- GitHub auth: two consumers, two mechanisms ---
-# Requires the 1Password CLI (`brew install 1password-cli`) with desktop-app
-# integration. The token lives in 1Password (op://<vault>/<item>/<field>).
+# --- GitHub auth ---
+# Just run `gh auth login` once (browser OAuth). gh stores the resulting
+# credential in the OS keychain and reads it directly -- no env var and no
+# secret-manager call needed at command time, so it works fine in
+# non-interactive, scripted, and sandboxed shells.
 #
-# 1. The gh CLI reads its own credential from the OS keychain, seeded once by
-#    `gh-token-refresh` below. gh then needs NO env var and NO 1Password call at
-#    command time, so it works in non-interactive, scripted, and sandboxed
-#    shells. Re-run `gh-token-refresh` when the PAT is rotated.
+# Do not wire GITHUB_TOKEN/GH_TOKEN up to a secret manager (e.g. 1Password's
+# `op` CLI) called eagerly on every interactive shell. `op` needs a unix
+# socket to the desktop app that a sandboxed shell (e.g. Claude Code) cannot
+# reach, and the failure mode is not a clean error -- it hangs silently
+# waiting on a Touch ID prompt the sandbox has no way to surface. Learned the
+# hard way; cost real debugging time.
 #
-# 2. Tools that only accept a token via the environment (notably the GitHub MCP
-#    server) get one from `load-github-token`, eager-loaded on interactive
-#    shells.
-#
-# DO NOT add a gh() wrapper that lazily fetches the token. Two reasons, both
-# learned the hard way:
-#
-#   a. A wrapper cannot survive Claude Code's shell snapshot. The snapshot
-#      copies functions out of an interactive zsh but drops every
-#      single-underscore-prefixed name, because the interactive shell has ~9700
-#      of them (zsh's completion system). A gh() wrapper calling a _helper
-#      therefore lands in the snapshot calling a function that was stripped, and
-#      every gh call dies with "_helper: command not found". This is also why
-#      the functions below have no leading underscore and keep their config
-#      inline rather than in _-prefixed globals.
-#
-#   b. `op` cannot run inside Claude Code's Bash sandbox at all -- it needs a
-#      unix socket to the 1Password desktop app, which the sandbox blocks. A
-#      lazy fetch can never succeed there.
-#
-# Related: gh itself also cannot run sandboxed on macOS. It fails TLS
-# verification with "x509: OSStatus -26276" because the sandbox blocks
-# securityd. This surfaces misleadingly as gh reporting "the token in keyring is
-# invalid" -- it is not an auth problem. Add "gh" and "gh *" to
-# sandbox.excludedCommands in ~/.claude/settings.json.
-#
-# load-github-token() {
-#   local account="my.1password.com"   # omit --account if single-account
-#   local ref="op://Private/GitHub CLI token/credential"
-#   if [[ -n $GITHUB_TOKEN ]]; then
-#     export GH_TOKEN="${GH_TOKEN:-$GITHUB_TOKEN}"
-#     export GITHUB_PERSONAL_ACCESS_TOKEN="${GITHUB_PERSONAL_ACCESS_TOKEN:-$GITHUB_TOKEN}"
-#     return 0
-#   fi
-#   command -v op >/dev/null 2>&1 || { print -u2 "op (1Password CLI) not found"; return 1; }
-#   local tok
-#   tok="$(op read --account "$account" "$ref" 2>/dev/null)" \
-#     || { print -u2 "failed to read GITHUB_TOKEN from 1Password"; return 1; }
-#   export GITHUB_TOKEN="$tok"
-#   export GH_TOKEN="$tok"
-#   export GITHUB_PERSONAL_ACCESS_TOKEN="$tok"
-# }
-#
-# Re-seed the gh CLI's keychain credential. Piped, so the token never reaches
-# disk, a temp file, or the shell history.
-# gh-token-refresh() {
-#   local account="my.1password.com"
-#   local ref="op://Private/GitHub CLI token/credential"
-#   command -v op >/dev/null 2>&1 || { print -u2 "op (1Password CLI) not found"; return 1; }
-#   op read --account "$account" "$ref" \
-#     | command gh auth login --hostname github.com --with-token \
-#     || { print -u2 "failed to seed gh credential from 1Password"; return 1; }
-#   command gh auth status
-# }
-#
-# Guarded to interactive shells so scripts never trigger a 1Password prompt.
-# gh itself does not depend on this -- it uses the keychain credential.
-# if [[ -o interactive ]] && command -v op >/dev/null 2>&1; then
-#   load-github-token 2>/dev/null
-# fi
+# Also: gh itself cannot run sandboxed on macOS. It fails TLS verification
+# with "x509: OSStatus -26276" because the sandbox blocks securityd. This
+# surfaces misleadingly as gh reporting "the token in keyring is invalid" --
+# it is not an auth problem. Add "gh" and "gh *" to sandbox.excludedCommands
+# in ~/.claude/settings.json.
