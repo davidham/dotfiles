@@ -67,9 +67,6 @@ export GOPATH="$HOME/go"
 # shellcheck disable=SC2206
 path=("$GOPATH/bin" $path)
 
-# --- Docker ---
-export DOCKER_DEFAULT_PLATFORM=linux/amd64
-
 # --- AWS ---
 # Default profile; can be overridden in shell-local.zsh or by the env.
 export AWS_PROFILE="${AWS_PROFILE:-govcloud-dev}"
